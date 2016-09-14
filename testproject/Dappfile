@@ -1,0 +1,33 @@
+name 'test'
+
+builder :chef
+
+git_artifact.local '/myapp'
+
+chef.attributes['mdapp-test2']['sayhello'] = 'hello'
+chef.before_install_attributes['mdapp-test2']['sayhelloagain'] = 'helloagain'
+chef.build_artifact_attributes['mdapp-testartifact']['target_filename'] = 'note.txt'
+
+artifact '/myartifact', before: :install do
+  docker.from 'ubuntu:14.04'
+  chef.module 'testartifact'
+  chef.recipe 'myartifact'
+end
+
+chef.module 'test'
+chef.recipe 'main'
+
+app 'X' do
+  docker.from 'ubuntu:14.04'
+  chef.module 'test2'
+  chef.recipe 'X'
+
+  app 'Y' do
+    chef.recipe 'X_Y'
+  end
+end
+
+app 'Z' do
+  docker.from 'centos:7'
+  chef.recipe 'Z'
+end
